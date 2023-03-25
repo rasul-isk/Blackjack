@@ -1,9 +1,10 @@
 package org.example;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Games {
-    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     private Map<Integer, List<Session>> games;  // <gameSessionId, list of its sessions>
 
@@ -20,7 +21,7 @@ public class Games {
     }
 
     //Sorting lists of sessions by timestamp
-    public void Sort() {
+    public void sort() {
         for (List<Session> sessions : games.values()) {
             Collections.sort(sessions, Comparator.comparingLong(Session::timestamp));
         }
@@ -38,6 +39,7 @@ public class Games {
                 }
             }
         }
+
         return sb.toString();
     }
 
@@ -100,26 +102,24 @@ public class Games {
                 sum += 10;
             } else if (card.matches("[Aa].*")) {
                 sum += 11;
-            } else {
+            } else if (card.matches("\\d.*")) {
                 try {
                     int num = Integer.parseInt(card.substring(0, card.length() - 1));
                     sum += num;
                 } catch (NumberFormatException e) {
-                    // No throws required here
+                    e.printStackTrace();
                 }
             }
         }
         return sum;
     }
 
+    @Override
     public String toString() {
-        StringBuilder result = new StringBuilder();
-        for (List<Session> sessions : games.values()) {
-            for (Session session : sessions) {
-                result.append(session.toString()).append(LINE_SEPARATOR);
-            }
-            result.append(LINE_SEPARATOR);
-        }
-        return result.toString();
+        return games.values().stream()
+                .flatMap(List::stream)
+                .map(session -> session.toString())
+                .collect(Collectors.joining(LINE_SEPARATOR));
+
     }
 }

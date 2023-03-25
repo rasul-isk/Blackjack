@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.List;
 
 public class Main {
-    public static final String FILE_SEPARATOR = File.separator;
+    private static final String FILE_SEPARATOR = File.separator;
 
     //Method to read file, initialise objects and return all-in-one "games" object
     static Games readFile(String fileName) {
@@ -30,11 +30,12 @@ public class Main {
                 }
             }
 
-            games.Sort();
+            games.sort();
             return games;
 
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return new Games();
         }
     }
 
@@ -54,6 +55,7 @@ public class Main {
         File file = new File("." + FILE_SEPARATOR);
         while (file.exists()) {
             Games game = readFile("game_data_" + iterator + ".txt");
+            System.out.println(game.toString());
             String errors = game.findInvalidSessions();
             writeFile(filesPath + "Analyze" + FILE_SEPARATOR + "analyzer_output_" + iterator + ".txt", errors);
 
