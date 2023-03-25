@@ -1,28 +1,23 @@
 package org.example;
 
 import java.io.*;
-import java.sql.Array;
-import java.util.*;
+import java.util.List;
 
 public class Main {
+    public static final String FILE_SEPARATOR = File.separator;
 
-    static Games ReadFile(String fileName) {
-        try {
-            InputStream input = Main.class.getClassLoader().getResourceAsStream("Game Data/" + fileName);
+    //Method to read file, initialise objects and return all-in-one "games" object
+    static Games readFile(String fileName) {
+        try (InputStream input = Main.class.getClassLoader().getResourceAsStream("Game Data" + FILE_SEPARATOR + fileName);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
 
-            if (input == null) {
-                throw new FileNotFoundException("Requested file not found: " + fileName);
-            }
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
             Games games = new Games();
             String line;
-            while ((line =  reader.readLine()) != null) {
-                //  timestamp | gameSessionId | playerId | action | dealerHand | playerHand
+            while ((line = reader.readLine()) != null) {
                 String[] line_parts = line.split(",");
-                boolean hasEmptyOrNull = Arrays.stream(line_parts).anyMatch(str -> str == null || str.isEmpty());
+                boolean hasEmptyOrNull = List.of(line_parts).stream().anyMatch(str -> str == null || str.isEmpty());
 
-                if(line_parts.length == 6 && !hasEmptyOrNull) {
+                if (line_parts.length == 6 && !hasEmptyOrNull) {
                     Session gameSession = new Session(
                             Long.parseLong(line_parts[0]),
                             Integer.parseInt(line_parts[1]),
@@ -35,22 +30,35 @@ public class Main {
                 }
             }
 
-            reader.close();
-
             games.Sort();
-
             return games;
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
+    //Method to write output file
+    static void writeFile(String filePath, String input) {
+        try (FileWriter writer = new FileWriter(filePath)) {
+            writer.write(input);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    //Looping through existing data files and writing output files
     public static void main(String[] args) {
-//        Read files
-//        for(int i = 1; i<4; i++) {
-//
-//        }
-        Games game = ReadFile("game_data_1.txt");
-//        System.out.println(game.toString());
-        System.out.println(game.detectErrors());
+        Integer iterator = 0;
+        String filesPath = "src" + FILE_SEPARATOR + "main" + FILE_SEPARATOR + "resources" + FILE_SEPARATOR + "";
+        File file = new File("." + FILE_SEPARATOR);
+        while (file.exists()) {
+            Games game = readFile("game_data_" + iterator + ".txt");
+            String errors = game.findInvalidSessions();
+            writeFile(filesPath + "Analyze" + FILE_SEPARATOR + "analyzer_output_" + iterator + ".txt", errors);
+
+            iterator++;
+            file = new File(filesPath + "Game Data" + FILE_SEPARATOR + "game_data_" + iterator + ".txt");
+        }
     }
 }
