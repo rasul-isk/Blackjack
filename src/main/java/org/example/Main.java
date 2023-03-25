@@ -55,7 +55,6 @@ public class Main {
         File file = new File("." + FILE_SEPARATOR);
         while (file.exists()) {
             Games game = readFile("game_data_" + iterator + ".txt");
-            System.out.println(game.toString());
             String errors = game.findInvalidSessions();
             writeFile(filesPath + "Analyze" + FILE_SEPARATOR + "analyzer_output_" + iterator + ".txt", errors);
 
